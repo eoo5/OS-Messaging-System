@@ -1,39 +1,40 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
+#include <syscall.h>
 #include <errno.h>
 
-// Define your custom syscall numbers
-#define CS1550_SEND_MSG 442
-#define CS1550_GET_MSG 443
-
-// Custom syscall prototypes
-long sys_cs1550_send_msg(const char __user *to, const char __user *msg, const char __user *from);
-long sys_cs1550_get_msg(const char __user *to, char __user *msg, char __user *from);
+// Define syscall numbers for your custom syscalls
+#define CS1550_SEND_MSG_SYSCALL_NUMBER 442
+#define CS1550_GET_MSG_SYSCALL_NUMBER 443
 
 int main() {
-    const char *sender = "user1";
-    const char *recipient = "user2";
-    const char *message = "Hello, user2!";
-    char received_message[256];
+    long send_result, get_result;
 
-    // Send a message
-    long send_result = sys_cs1550_send_msg(recipient, message, sender);
-    if (send_result == 0) {
-        printf("Message sent successfully!\n");
+    // Try to make the sys_cs1550_send_msg syscall
+    send_result = syscall(CS1550_SEND_MSG_SYSCALL_NUMBER, "recipient", "Hello", "sender");
+    if (send_result == -1) {
+        if (errno == ENOSYS) {
+            printf("sys_cs1550_send_msg does not exist in the kernel.\n");
+        } else {
+            perror("Error making sys_cs1550_send_msg syscall");
+        }
     } else {
-        printf("Message sending failed (Error code: %ld)\n", send_result);
+        printf("sys_cs1550_send_msg exists in the kernel.\n");
     }
 
-    // Get a message
-    long get_result = sys_cs1550_get_msg(sender, received_message, recipient);
-    if (get_result == 0) {
-        printf("Received message: %s\n", received_message);
+    // Try to make the sys_cs1550_get_msg syscall
+    get_result = syscall(CS1550_GET_MSG_SYSCALL_NUMBER, "recipient", "msg", "sender");
+    if (get_result == -1) {
+        if (errno == ENOSYS) {
+            printf("sys_cs1550_get_msg does not exist in the kernel.\n");
+        } else {
+            perror("Error making sys_cs1550_get_msg syscall");
+        }
     } else {
-        printf("Message retrieval failed (Error code: %ld)\n", get_result);
+        printf("sys_cs1550_get_msg exists in the kernel.\n");
     }
 
     return 0;
 }
-
