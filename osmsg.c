@@ -5,7 +5,7 @@
 #include <syscall.h>
 #include <errno.h>
 
-// Define syscall numbers for your custom syscalls
+// Define syscall numbers for the custom syscalls
 #define CS1550_SEND_MSG_SYSCALL_NUMBER 442
 #define CS1550_GET_MSG_SYSCALL_NUMBER 443
 
