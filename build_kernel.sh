@@ -12,7 +12,6 @@ rm -rf mods
 
 echo "Kernel built and mod packaged"
 
-/*
-chmod +x build_kernel.sh
-./build_kernel.sh
-*/
+#chmod +x build_kernel.sh
+#./build_kernel.sh
+
