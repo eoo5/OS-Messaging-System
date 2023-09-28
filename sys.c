@@ -194,14 +194,50 @@ out:
 	return error;
 }
 
+
 SYSCALL_DEFINE3(sys_cs1550_send_msg, const char __user *, to, const char __user *, msg, const char __user *, from) {
-{
-	return -ENOSYS;
+    int retval = -ENOSYS; // Initialize the return value with -ENOSYS (System call not implemented)
+
+    // printk statement to indicate that the syscall was invoked
+    printk(KERN_INFO "cs1550_send_msg syscall invoked\n");
+
+    if (to == NULL || msg == NULL || from == NULL) {
+        pr_err("Invalid user-space pointer(s).\n");
+        retval = -EFAULT; // Return an appropriate error code
+    } else {
+        // Test to see parameters
+        pr_info("cs1550_send_msg called with parameters:\n");
+        pr_info("to: %s\n", to);
+        pr_info("msg: %s\n", msg);
+        pr_info("from: %s\n", from);
+
+        retval = 0; // For success
+    }
+
+    return retval;
 }
+
 SYSCALL_DEFINE3(sys_cs1550_get_msg, const char __user *, to, char __user *, msg, char __user *, from) {
-{
-	return -ENOSYS;
+    int retval = -ENOSYS; // Initialize the return value with -ENOSYS (System call not implemented)
+
+    // printk statement to indicate that the syscall was invoked
+    printk(KERN_INFO "cs1550_get_msg syscall invoked\n");
+
+    if (to == NULL || msg == NULL || from == NULL) {
+        pr_err("Invalid user-space pointer(s).\n");
+        retval = -EFAULT; // Return an appropriate error code
+    } else {
+        pr_info("cs1550_get_msg called with parameters:\n");
+        pr_info("to: %s\n", to);
+        pr_info("msg: %p\n", msg);
+        pr_info("from: %p\n", from);
+
+        retval = 0; // For success
+    }
+
+    return retval;
 }
+
 
 SYSCALL_DEFINE3(setpriority, int, which, int, who, int, niceval)
 {
