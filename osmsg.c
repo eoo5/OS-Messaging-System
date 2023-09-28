@@ -6,8 +6,8 @@
 #include <errno.h>
 
 // Define syscall numbers for the custom syscalls
-#define CS1550_SEND_MSG_SYSCALL_NUMBER 442
-#define CS1550_GET_MSG_SYSCALL_NUMBER 443
+#define CS1550_SEND_MSG_SYSCALL_NUMBER 441
+#define CS1550_GET_MSG_SYSCALL_NUMBER 442
 
 int main() {
     long send_result, get_result;
