@@ -195,7 +195,7 @@ out:
 }
 
 
-SYSCALL_DEFINE3(sys_cs1550_send_msg, const char __user *, to, const char __user *, msg, const char __user *, from) {
+SYSCALL_DEFINE3(cs1550_send_msg, const char __user *, to, const char __user *, msg, const char __user *, from) {
     int retval = -ENOSYS; // Initialize the return value with -ENOSYS (System call not implemented)
 
     // printk statement to indicate that the syscall was invoked
@@ -217,7 +217,7 @@ SYSCALL_DEFINE3(sys_cs1550_send_msg, const char __user *, to, const char __user 
     return retval;
 }
 
-SYSCALL_DEFINE3(sys_cs1550_get_msg, const char __user *, to, char __user *, msg, char __user *, from) {
+SYSCALL_DEFINE3(cs1550_get_msg, const char __user *, to, char __user *, msg, char __user *, from) {
     int retval = -ENOSYS; // Initialize the return value with -ENOSYS (System call not implemented)
 
     // printk statement to indicate that the syscall was invoked
