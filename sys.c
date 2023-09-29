@@ -291,6 +291,7 @@ asmlinkage long sys_cs1550_get_msg(const char __user *to, char __user *msg, char
 
 //Handle return message with 1 indicating more than 1 message, 0 indicating no more, -1 none at all.
     if (found) {
+	printk(KERN_ALERT "Messages Found: %d\n", messages_found);
 	if(messages_found > 1){
 	    return 1; // More messages available
 	} 
