@@ -32,9 +32,9 @@ int main(int argc, char* argv[]) {
 
         // Concatenate additional words into the message if provided
         for (int i = 4; i < argc; i++) {
-        strncat(message, " ", remaining_space);
-        strncat(message, argv[i], remaining_space);
-        remaining_space = 256 - strlen(message) - 1; // Update remaining space
+            strncat(message, " ", remaining_space);
+            strncat(message, argv[i], remaining_space);
+            remaining_space = 256 - strlen(message) - 1; // Update remaining space
             if (remaining_space <= 0) {
                 break; // Avoid buffer overflow
             }
