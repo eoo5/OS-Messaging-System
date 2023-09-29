@@ -8,6 +8,8 @@
 // Syscall numbers
 #define SEND_MSG 441
 #define GET_MSG 442
+#define MAX_USER_LENGTH 15
+#define MAX_MESSAGE_LENGTH 256
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
@@ -22,19 +24,19 @@ int main(int argc, char* argv[]) {
         const char* sendee = argv[2];
         const char* message = argv[3];
 
-         if (sendee == NULL || message == NULL) {
+         if (sendee == NULL || message == NULL || strlen(sendee) > MAX_USER_LENGTH) {
             printf( "Invalid sendee or message.\n");
             return 1;
         }
 
 
-        size_t remaining_space = 256 - strlen(message) - 1; // -1 for the space character
+        size_t remaining_space = MAX_MESSAGE_LENGTH - strlen(message) - 2; // -1 for the space character
 
         // Concatenate additional words into the message if provided
         for (int i = 4; i < argc; i++) {
             strncat(message, " ", remaining_space);
             strncat(message, argv[i], remaining_space);
-            remaining_space = 256 - strlen(message) - 1; // Update remaining space
+            remaining_space = MAX_MESSAGE_LENGTH - strlen(message) - 2; // Update remaining space
             if (remaining_space <= 0) {
                 break; // Avoid buffer overflow
             }
@@ -57,7 +59,7 @@ int main(int argc, char* argv[]) {
         }
     } else if (strcmp(argv[1], "-r") == 0 && argc == 2) {
         // Read messages (message)
-        char message[256];
+        char message[MAX_MESSAGE_LENGTH];
         char sender[15];
 
         // Get the sendee's username using getenv()
