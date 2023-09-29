@@ -72,6 +72,12 @@
 #include <asm/io.h>
 #include <asm/unistd.h>
 
+/* CS1550 Project 2 */
+#include <linux/slab.h>
+#include <linux/string.h>
+#include <linux/module.h>
+
+
 #include "uid16.h"
 
 #ifndef SET_UNALIGN_CTL
@@ -194,48 +200,117 @@ out:
 	return error;
 }
 
+/* CS1550 */
+#define MAX_MESSAGE_LENGTH 256
+#define MAX_USER_LENGTH 15
 
-SYSCALL_DEFINE3(cs1550_send_msg, const char __user *, to, const char __user *, msg, const char __user *, from) {
-    int retval = -ENOSYS; // Initialize the return value with -ENOSYS (System call not implemented)
+// Data structure that represents a singular message(node)
+struct Message {
+    char sender[MAX_USER_LENGTH];
+    char sendee[MAX_USER_LENGTH];
+    char message[MAX_MESSAGE_LENGTH];
+    struct Message* next;
+};
 
-    // printk statement to indicate that the syscall was invoked
-    printk(KERN_INFO "cs1550_send_msg syscall invoked\n");
+// Initialize empty linked list
+static struct Message* message_list = NULL;
 
-    if (to == NULL || msg == NULL || from == NULL) {
-        pr_err("Invalid user-space pointer(s).\n");
-        retval = -EFAULT; // Return an appropriate error code
-    } else {
-        // Test to see parameters
-        pr_info("cs1550_send_msg called with parameters:\n");
-        pr_info("to: %s\n", to);
-        pr_info("msg: %s\n", msg);
-        pr_info("from: %s\n", from);
+asmlinkage long sys_cs1550_send_msg(const char __user *to, const char __user *msg, const char __user *from) {
+    struct Message *sent_message; //Initialize new message
 
-        retval = 0; // For success
+ // Allocate memory for the new message
+    sent_message = kmalloc(sizeof(struct Message), GFP_KERNEL);
+    if (!sent_message) {
+	kfree(cur);
+        return -ENOMEM; // Memory allocation failed
     }
 
-    return retval;
+ // Retrieve the sender's username from the user space
+     if (copy_from_user(sent_message->sender, from, MAX_USER_LENGTH)) {
+        kfree(sent_message);
+        return -EFAULT; // Error copying from user space
+    }
+
+// Retrieve the message from the user space
+    if (copy_from_user(sent_message->message, msg, MAX_MESSAGE_LENGTH)) {
+        kfree(sent_message);
+        return -EFAULT; // Error copying from user space
+    }
+
+// Retrieve the sendee's username from the user space
+    if (copy_from_user(sent_message->sendee, to, MAX_USER_LENGTH)) {
+        kfree(sent_message);
+        return -EFAULT; // Error copying from user space
+    }
+
+// Insert message to the head of the linked list
+    sent_message->next = message_list;
+    message_list = sent_message;
+
+    return 0;
 }
 
-SYSCALL_DEFINE3(cs1550_get_msg, const char __user *, to, char __user *, msg, char __user *, from) {
-    int retval = -ENOSYS; // Initialize the return value with -ENOSYS (System call not implemented)
+SYSCALL_DEFINE3(cs1550_send_msg, const char __user *, to, const char __user *, msg, const char __user *, from) {
 
     // printk statement to indicate that the syscall was invoked
-    printk(KERN_INFO "cs1550_get_msg syscall invoked\n");
+    printk(KERN_ALERT "cs1550_send_msg syscall invoked\n");
 
-    if (to == NULL || msg == NULL || from == NULL) {
-        pr_err("Invalid user-space pointer(s).\n");
-        retval = -EFAULT; // Return an appropriate error code
-    } else {
-        pr_info("cs1550_get_msg called with parameters:\n");
-        pr_info("to: %s\n", to);
-        pr_info("msg: %p\n", msg);
-        pr_info("from: %p\n", from);
+    return sys_cs1550_send_msg(to,msg,from);
+}
 
-        retval = 0; // For success
+asmlinkage long sys_cs1550_get_msg(const char __user *to, char __user *msg, char __user *from) {
+    struct Message *cur;
+    struct Message *prev = NULL;
+    int messages_found = 0;
+    int found = 0;
+
+// Find messages where the sendee matches the user
+    cur = message_list;
+
+    while (cur != NULL){
+	    
+//If the message is found
+        if (strncmp(cur->sendee, to, MAX_USER_LENGTH) == 0){
+            if(copy_to_user(msg, cur->message, MAX_MESSAGE_LENGTH)||
+	       copy_to_user(from, cur->sender, MAX_USER_LENGTH)) {
+                return -EFAULT; // Error copying to user space
+            }
+		
+	// Delete the message from message list
+            if (prev == NULL) {
+                message_list = cur->next;
+            } else {
+                prev->next = cur->next;
+            }
+
+	    kfree(cur);
+            found = 1;
+	    messages_found++; //Increment messages found
+            break;
+        }
+	prev = cur;
+        cur = cur->next;
     }
 
-    return retval;
+//Handle return message with 1 indicating more than 1 message, 0 indicating no more, -1 none at all.
+    if (found) {
+	if(messages_found > 1){
+	    return 1; // More messages available
+	} 
+        return 0; // Message retrieved successfully
+    } else {
+        return -1; // No messages for the recipient
+    }
+
+		
+    }
+
+SYSCALL_DEFINE3(cs1550_get_msg, const char __user *, to, char __user *, msg, char __user *, from) {
+
+    // printk statement to indicate that the syscall was invoked
+    printk(KERN_ALERT "cs1550_get_msg syscall invoked\n");
+
+    return sys_cs1550_get_msg(to,msg,from);;
 }
 
 
