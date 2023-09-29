@@ -1,4 +1,4 @@
-##define _GNU_SOURCE
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -14,22 +14,26 @@
 int main(int argc, char* argv[]) {
     if (argc < 2) {
         printf("Not enough entries.");
-        printf("To Send Message: osmsg -s [sendee] [message]\n");
-        printf("To Read your Messages: osmsg -r\n");
         return 1;
     }
 
-    if (strcmp(argv[1], "-s") == 0 && argc >= 4) {
+    if (argc >= 4 && strcmp(argv[1], "-s") == 0) {
         // Sending a message
         const char* sendee = argv[2];
         const char* message = argv[3];
-
-         if (sendee == NULL || message == NULL || strlen(sendee) > MAX_USER_LENGTH) {
-            printf( "Invalid sendee or message.\n");
-            return 1;
+        
+        // Check for buffer overflow or if the sendee or message is null
+            if (message == NULL){
+                printf("Invalid sendee or message.\n");
+                return 1;
+            }
+        
+            if(strlen(sendee) > MAX_USER_LENGTH || sendee == NULL) { 
+                printf( "Invalid sendee.\n");
+                return 1;
         }
 
-
+        // calculate remaining_space to prevent buffer overflow
         size_t remaining_space = MAX_MESSAGE_LENGTH - strlen(message) - 2; // -1 for the space character
 
         // Concatenate additional words into the message if provided
@@ -42,7 +46,7 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        // Get the sender's username using getenv()
+        // Get the sender's username 
         const char* sender = getenv("USER");
         if (!sender) {
             printf("Error getting sender's username");
@@ -50,6 +54,7 @@ int main(int argc, char* argv[]) {
         }
 
         long send_result = syscall(SEND_MSG, sendee, message, sender);
+        
         if (send_result == 0) {
             printf("Your message was sent\n");
         } else if (send_result == -1) {
@@ -57,10 +62,12 @@ int main(int argc, char* argv[]) {
         } else {
             printf("Error code: %ld\n", send_result);
         }
+        
+    //If reading inbox
     } else if (strcmp(argv[1], "-r") == 0 && argc == 2) {
         // Read messages (message)
         char message[MAX_MESSAGE_LENGTH];
-        char sender[15];
+        char sender[MAX_USER_LENGTH];
 
         // Get the sendee's username using getenv()
         const char* sendee = getenv("USER");
@@ -70,7 +77,7 @@ int main(int argc, char* argv[]) {
         }
 
         long get_result = syscall(GET_MSG, sendee, message, sender);
-
+//Handle inbox result, 0 if one message, -1 if none, 1 if more.
         if (get_result == 0) {
             printf("%s said: \"%s\"\n", sender, message);
         } else if (get_result == -1) {
@@ -83,8 +90,6 @@ int main(int argc, char* argv[]) {
         }
     } else {
         printf("Entries invalid");
-        printf("To Send Message: osmsg -s [sendee] [message]\n");
-        printf("To Read your Messages: osmsg -r\n");
         return 1;
     }
 
