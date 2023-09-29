@@ -218,7 +218,7 @@ static struct Message* message_list = NULL;
 asmlinkage long sys_cs1550_send_msg(const char __user *to, const char __user *msg, const char __user *from) {
     struct Message *sent_message; //Initialize new message
 
- // Allocate memory for the new message
+ // Allocate memory for the sent message (node)
     sent_message = kmalloc(sizeof(struct Message), GFP_KERNEL);
     if (!sent_message) {
         return -ENOMEM; // Memory allocation failed
@@ -283,7 +283,7 @@ asmlinkage long sys_cs1550_get_msg(const char __user *to, char __user *msg, char
 
             found = 1;
 	    messages_found++; //Increment messages found
-            break;
+            continue;
         }
 	prev = cur;
         cur = cur->next;
