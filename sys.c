@@ -202,7 +202,7 @@ out:
 
 /* CS1550 */
 #define MAX_MESSAGE_LENGTH 256
-#define MAX_USER_LENGTH 15
+#define MAX_USER_LENGTH 32
 
 // Data structure that represents a singular message(node)
 struct Message {
