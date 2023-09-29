@@ -12,8 +12,12 @@
 #define MAX_MESSAGE_LENGTH 256
 
 int main(int argc, char* argv[]) {
+    
+//Catch not enough arguments error.
     if (argc < 2) {
-        printf("Not enough entries.");
+        printf("Not enough entries. Try\n");
+        printf("./osmsg.c -s <sendee> <msg>\n");
+        printf("./osmsg.c -r\n");
         return 1;
     }
 
@@ -49,7 +53,7 @@ int main(int argc, char* argv[]) {
         // Get the sender's username 
         const char* sender = getenv("USER");
         if (!sender) {
-            printf("Error getting sender's username");
+            printf("Error getting sender's username\n");
             return 1;
         }
 
@@ -58,7 +62,7 @@ int main(int argc, char* argv[]) {
         if (send_result == 0) {
             printf("Your message was sent\n");
         } else if (send_result == -1) {
-            printf("Error sending message");
+            printf("Error sending message\n");
         } else {
             printf("Error code: %ld\n", send_result);
         }
@@ -72,7 +76,7 @@ int main(int argc, char* argv[]) {
         // Get the sendee's username using getenv()
         const char* sendee = getenv("USER");
         if (!sendee) {
-            printf("Error getting sendee's username");
+            printf("Error getting sendee's username\n");
             return 1;
         }
 
@@ -86,10 +90,10 @@ int main(int argc, char* argv[]) {
             printf("%s said: \"%s\"\n", sender, message);
             printf("You've got more mail!\n");
         } else {
-            printf("Error getting messages");
+            printf("Error getting messages\n");
         }
     } else {
-        printf("Entries invalid");
+        printf("Entries invalid\n");
         return 1;
     }
 
