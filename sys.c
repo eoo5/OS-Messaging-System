@@ -221,7 +221,6 @@ asmlinkage long sys_cs1550_send_msg(const char __user *to, const char __user *ms
  // Allocate memory for the new message
     sent_message = kmalloc(sizeof(struct Message), GFP_KERNEL);
     if (!sent_message) {
-	kfree(sent_message);
         return -ENOMEM; // Memory allocation failed
     }
 
