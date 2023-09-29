@@ -1,39 +1,89 @@
-#define _GNU_SOURCE
+##define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <syscall.h>
+#include <string.h>
 #include <errno.h>
 
-// Define syscall numbers for the custom syscalls
-#define CS1550_SEND_MSG_SYSCALL_NUMBER 441
-#define CS1550_GET_MSG_SYSCALL_NUMBER 442
+// Syscall numbers
+#define SEND_MSG 441
+#define GET_MSG 442
 
-int main() {
-    long send_result, get_result;
-
-    // Try to make the sys_cs1550_send_msg syscall
-    send_result = syscall(CS1550_SEND_MSG_SYSCALL_NUMBER, "recipient", "Hello", "sender");
-    if (send_result == -1) {
-        if (errno == ENOSYS) {
-            printf("sys_cs1550_send_msg does not exist in the kernel.\n");
-        } else {
-            perror("Error making sys_cs1550_send_msg syscall");
-        }
-    } else {
-        printf("sys_cs1550_send_msg exists in the kernel.\n");
+int main(int argc, char* argv[]) {
+    if (argc < 2) {
+        printf("Not enough entries.");
+        printf("To Send Message: osmsg -s [sendee] [message]\n");
+        printf("To Read your Messages: osmsg -r\n");
+        return 1;
     }
 
-    // Try to make the sys_cs1550_get_msg syscall
-    get_result = syscall(CS1550_GET_MSG_SYSCALL_NUMBER, "recipient", "msg", "sender");
-    if (get_result == -1) {
-        if (errno == ENOSYS) {
-            printf("sys_cs1550_get_msg does not exist in the kernel.\n");
+    if (strcmp(argv[1], "-s") == 0 && argc >= 4) {
+        // Sending a message
+        const char* sendee = argv[2];
+        const char* message = argv[3];
+
+         if (sendee == NULL || message == NULL) {
+            printf( "Invalid sendee or message.\n");
+            return 1;
+        }
+
+
+        size_t remaining_space = 256 - strlen(message) - 1; // -1 for the space character
+
+        // Concatenate additional words into the message if provided
+        for (int i = 4; i < argc; i++) {
+        strncat(message, " ", remaining_space);
+        strncat(message, argv[i], remaining_space);
+        remaining_space = 256 - strlen(message) - 1; // Update remaining space
+            if (remaining_space <= 0) {
+                break; // Avoid buffer overflow
+            }
+        }
+
+        // Get the sender's username using getenv()
+        const char* sender = getenv("USER");
+        if (!sender) {
+            printf("Error getting sender's username");
+            return 1;
+        }
+
+        long send_result = syscall(SEND_MSG, sendee, message, sender);
+        if (send_result == 0) {
+            printf("Your message was sent\n");
+        } else if (send_result == -1) {
+            printf("Error sending message");
         } else {
-            perror("Error making sys_cs1550_get_msg syscall");
+            printf("Error code: %ld\n", send_result);
+        }
+    } else if (strcmp(argv[1], "-r") == 0 && argc == 2) {
+        // Read messages (message)
+        char message[256];
+        char sender[15];
+
+        // Get the sendee's username using getenv()
+        const char* sendee = getenv("USER");
+        if (!sendee) {
+            printf("Error getting sendee's username");
+            return 1;
+        }
+
+        long get_result = syscall(GET_MSG, sendee, message, sender);
+
+        if (get_result == 0) {
+            printf("%s said: \"%s\"\n", sender, message);
+        } else if (get_result == -1) {
+            printf("Empty Inbox :(.\n");
+        } else if (get_result == 1) {
+            printf("%s said: \"%s\"\n", sender, message);
+            printf("You've got more mail!\n");
+        } else {
+            printf("Error getting messages");
         }
     } else {
-        printf("sys_cs1550_get_msg exists in the kernel.\n");
+        printf("Entries invalid");
+        printf("To Send Message: osmsg -s [sendee] [message]\n");
+        printf("To Read your Messages: osmsg -r\n");
+        return 1;
     }
 
     return 0;
