@@ -221,7 +221,7 @@ asmlinkage long sys_cs1550_send_msg(const char __user *to, const char __user *ms
  // Allocate memory for the new message
     sent_message = kmalloc(sizeof(struct Message), GFP_KERNEL);
     if (!sent_message) {
-	kfree(cur);
+	kfree(sent_message);
         return -ENOMEM; // Memory allocation failed
     }
 
@@ -259,17 +259,16 @@ SYSCALL_DEFINE3(cs1550_send_msg, const char __user *, to, const char __user *, m
 }
 
 asmlinkage long sys_cs1550_get_msg(const char __user *to, char __user *msg, char __user *from) {
-    struct Message *cur;
+    struct Message *cur = message_list;
     struct Message *prev = NULL;
     int messages_found = 0;
     int found = 0;
 
 // Find messages where the sendee matches the user
-    cur = message_list;
-
+	
     while (cur != NULL){
 	    
-//If the message is found
+// If the message is found copy back into paramaters
         if (strncmp(cur->sendee, to, MAX_USER_LENGTH) == 0){
             if(copy_to_user(msg, cur->message, MAX_MESSAGE_LENGTH)||
 	       copy_to_user(from, cur->sender, MAX_USER_LENGTH)) {
@@ -283,7 +282,6 @@ asmlinkage long sys_cs1550_get_msg(const char __user *to, char __user *msg, char
                 prev->next = cur->next;
             }
 
-	    kfree(cur);
             found = 1;
 	    messages_found++; //Increment messages found
             break;
@@ -310,7 +308,7 @@ SYSCALL_DEFINE3(cs1550_get_msg, const char __user *, to, char __user *, msg, cha
     // printk statement to indicate that the syscall was invoked
     printk(KERN_ALERT "cs1550_get_msg syscall invoked\n");
 
-    return sys_cs1550_get_msg(to,msg,from);;
+    return sys_cs1550_get_msg(to,msg,from);
 }
 
 
