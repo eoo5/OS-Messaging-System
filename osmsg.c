@@ -8,7 +8,7 @@
 // Syscall numbers
 #define SEND_MSG 441
 #define GET_MSG 442
-#define MAX_USER_LENGTH 15
+#define MAX_USER_LENGTH 32
 #define MAX_MESSAGE_LENGTH 256
 
 int main(int argc, char* argv[]) {
@@ -24,10 +24,11 @@ int main(int argc, char* argv[]) {
     if (argc >= 4 && strcmp(argv[1], "-s") == 0) {
         // Sending a message
         const char* sendee = argv[2];
-        const char* message = argv[3];
+        char message[MAX_MESSAGE_LENGTH]; // Allocate a buffer for the message
+        strcpy(message, argv[3]); // Copy the initial message
         
         // Check for buffer overflow or if the sendee or message is null
-            if (message == NULL){
+            if (message == NULL|| sendee == NULL){
                 printf("Invalid sendee or message.\n");
                 return 1;
             }
@@ -38,16 +39,16 @@ int main(int argc, char* argv[]) {
         }
 
         // calculate remaining_space to prevent buffer overflow
-        size_t remaining_space = MAX_MESSAGE_LENGTH - strlen(message) - 2; // -1 for the space character
+        size_t remaining_space = MAX_MESSAGE_LENGTH - strlen(message) - 1; // -1 for the space character
 
-        // Concatenate additional words into the message if provided
+        // add words separated by space
         for (int i = 4; i < argc; i++) {
-            strncat(message, " ", remaining_space);
-            strncat(message, argv[i], remaining_space);
-            remaining_space = MAX_MESSAGE_LENGTH - strlen(message) - 2; // Update remaining space
             if (remaining_space <= 0) {
                 break; // Avoid buffer overflow
             }
+            strncat(message, " ", remaining_space);
+            strncat(message, argv[i], remaining_space);
+            remaining_space = MAX_MESSAGE_LENGTH - strlen(message) - 1; // Update remaining space
         }
 
         // Get the sender's username 
