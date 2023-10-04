@@ -283,7 +283,7 @@ asmlinkage long sys_cs1550_get_msg(const char __user *to, char __user *msg, char
 
             found = 1;
 	    messages_found++; //Increment messages found
-            continue;
+            break;
         }
 	prev = cur;
         cur = cur->next;
