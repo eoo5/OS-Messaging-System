@@ -296,9 +296,9 @@ asmlinkage long sys_cs1550_get_msg(const char __user *to, char __user *msg, char
         return 1;  // More messages available
     } else if (messages_found == 1) {
         return 0;  // Message retrieved successfully
-    } else {
-        return -1; // No messages for the recipient
-    }
+    } 
+   }
+       return -1; //No Messages found
 }
 
 SYSCALL_DEFINE3(cs1550_get_msg, const char __user *, to, char __user *, msg, char __user *, from) {
