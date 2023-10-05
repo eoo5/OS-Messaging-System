@@ -265,29 +265,35 @@ asmlinkage long sys_cs1550_get_msg(const char __user *to, char __user *msg, char
 
 // Find messages where the sendee matches the user
 	
-    while (cur != NULL){
-	    
-// If the message is found copy back into paramaters
-        if (strncmp(cur->sendee, to, MAX_USER_LENGTH) == 0){
-            if(copy_to_user(msg, cur->message, MAX_MESSAGE_LENGTH)||
-	       copy_to_user(from, cur->sender, MAX_USER_LENGTH)) {
-                return -EFAULT; // Error copying to user space
-            }
-		
-	// Delete the message from message list
-            if (prev == NULL) {
-                message_list = cur->next;
-            } else {
-                prev->next = cur->next;
-            }
+struct Message *temp; // Temporary pointer to the next node
 
-            found = 1;
-	    kfree(cur);
-	    messages_found++; //Increment messages found
+while (cur != NULL) {
+    // If the message is found, copy back into the parameters
+    if (strncmp(cur->sendee, to, MAX_USER_LENGTH) == 0) {
+        if (copy_to_user(msg, cur->message, MAX_MESSAGE_LENGTH) ||
+            copy_to_user(from, cur->sender, MAX_USER_LENGTH)) {
+            kfree(cur); // Free memory before returning -EFAULT
+            return -EFAULT; // Error copying to user space
         }
-	prev = cur;
+
+        // Delete the message from the message list
+        if (prev == NULL) {
+            message_list = cur->next;
+        } else {
+            prev->next = cur->next;
+        }
+
+        found = 1;
+        temp = cur;     // save cur reference in temp
+        cur = cur->next; // shift cur to next node
+
+        kfree(temp); // Free the memory of the deleted node
+        messages_found++; // Increment messages found
+    } else {
+        prev = cur;
         cur = cur->next;
     }
+}
 
 //Handle return message with 1 indicating more than 1 message, 0 indicating no more, -1 none at all.
    if (found) {
