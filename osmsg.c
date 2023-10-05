@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
         // Sending a message
         const char* sendee = argv[2];
         char message[MAX_MESSAGE_LENGTH]; // Allocate a buffer for the message
-        strcpy(message, argv[3]); // Copy the initial message
+        strcpy(message, argv[3]); // Copy the initial message so that we can use strncat
         
         // Check for buffer overflow or if the sendee or message is null
             if (message == NULL|| sendee == NULL){
@@ -51,13 +51,14 @@ int main(int argc, char* argv[]) {
             remaining_space = MAX_MESSAGE_LENGTH - strlen(message) - 1; // Update remaining space
         }
 
-        // Get the sender's username 
+        // Fetch sender's username 
         const char* sender = getenv("USER");
         if (!sender) {
             printf("Error getting sender's username\n");
             return 1;
         }
-
+        //Call send_result
+        
         long send_result = syscall(SEND_MSG, sendee, message, sender);
         
         if (send_result == 0) {
@@ -68,33 +69,40 @@ int main(int argc, char* argv[]) {
             printf("Error code: %ld\n", send_result);
         }
         
-    //If reading inbox
+    //If reading inbox and input is valid
     } else if (strcmp(argv[1], "-r") == 0 && argc == 2) {
-        // Read messages (message)
-        char message[MAX_MESSAGE_LENGTH];
-        char sender[MAX_USER_LENGTH];
-
+    
         // Get the sendee's username using getenv()
         const char* sendee = getenv("USER");
         if (!sendee) {
             printf("Error getting sendee's username\n");
             return 1;
         }
-
+        
+        while (1) {
+        // Read messages (message) and sender
+        char message[MAX_MESSAGE_LENGTH];
+        char sender[MAX_USER_LENGTH];
+            
         long get_result = syscall(GET_MSG, sendee, message, sender);
 //Handle inbox result, 0 if one message, -1 if none, 1 if more.
         if (get_result == 0) {
             printf("%s said: \"%s\"\n", sender, message);
+            break;
         } else if (get_result == -1) {
             printf("Empty Inbox :(.\n");
+            break;
         } else if (get_result == 1) {
             printf("%s said: \"%s\"\n", sender, message);
             printf("You've got more mail!\n");
         } else {
-            printf("Error getting messages\n");
+           printf("Error getting messages (Error code: %ld)\n", get_result);
+           break; // Exit the loop on error
         }
+      }
     } else {
         printf("Entries invalid\n");
+        
         return 1;
     }
 
