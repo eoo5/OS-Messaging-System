@@ -265,7 +265,7 @@ asmlinkage long sys_cs1550_get_msg(const char __user *to, char __user *msg, char
 
 // Find messages where the sendee matches the user
 	
-struct Message *temp; // Temporary pointer to the next node
+struct Message *temp; // way to save current node
 
 while (cur != NULL) {
     // If the message is found, copy back into the parameters
