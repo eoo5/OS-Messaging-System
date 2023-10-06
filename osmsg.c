@@ -78,11 +78,11 @@ int main(int argc, char* argv[]) {
             printf("Error getting sendee's username\n");
             return 1;
         }
-        
-        while (1) {
-        // Read messages (message) and sender
         char message[MAX_MESSAGE_LENGTH];
         char sender[MAX_USER_LENGTH];
+        while (1) {
+        // Read messages (message) and sender
+
             
         long get_result = syscall(GET_MSG, sendee, message, sender);
 //Handle inbox result, 0 if one message, -1 if none, 1 if more.
