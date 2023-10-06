@@ -265,13 +265,11 @@ asmlinkage long sys_cs1550_get_msg(const char __user *to, char __user *msg, char
 
 // Find messages where the sendee matches the user
 	
-struct Message *temp; // way to save current node
 struct Message *last_found = NULL; //way to keep track of last/oldest message found
 	
 while (cur != NULL) {
     // If message is found, update last_found and temp
     if (strncmp(cur->sendee, to, MAX_USER_LENGTH) == 0) {
-        temp = cur; // save cur pointer in temp
         last_found = cur; // update the last found message to be cur
         found = 1; //flag found
         messages_found++; // increment messages_found
