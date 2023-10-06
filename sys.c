@@ -251,8 +251,6 @@ asmlinkage long sys_cs1550_send_msg(const char __user *to, const char __user *ms
 
 SYSCALL_DEFINE3(cs1550_send_msg, const char __user *, to, const char __user *, msg, const char __user *, from) {
 
-    // printk statement to indicate that the syscall was invoked
-    printk(KERN_ALERT "cs1550_send_msg syscall invoked\n");
 
     return sys_cs1550_send_msg(to,msg,from);
 }
@@ -276,7 +274,7 @@ while (cur != NULL || messages_found > 1) { // no need to find each message sinc
         found = 1; //flag found
         messages_found++; // increment messages_found
     }
-	prev = cur;
+	prev = cur; //iterate to next
 	cur = cur->next;
 }
 //If message was found, copy to parameter and delete it so it doesn't get found again.	
@@ -288,9 +286,9 @@ if(found) {
 	
     // Delete last message found
     if (last_found == message_list) {
-        message_list = last_found->next;
+        message_list = last_found->next; 
     } else {
-        tempprev->next = last_found->next;
+        tempprev->next = last_found->next; 
     }
 	
     kfree(last_found);
@@ -306,8 +304,6 @@ if(found) {
 }
 
 SYSCALL_DEFINE3(cs1550_get_msg, const char __user *, to, char __user *, msg, char __user *, from) {
-
-
 
     return sys_cs1550_get_msg(to,msg,from);
 }
