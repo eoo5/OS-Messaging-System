@@ -266,7 +266,7 @@ asmlinkage long sys_cs1550_get_msg(const char __user *to, char __user *msg, char
 	
 struct Message *last_found = NULL; //way to keep track of last/oldest message found
 	
-while (cur != NULL && messages_found < 2) { // no need to find each message since we only return one at a time
+while (cur != NULL && messages_found != 2) { // no need to find each message since we only return one at a time
     // If message is found, update last_found and temp
     if (strncmp(cur->sendee, to, MAX_USER_LENGTH) == 0) {
         last_found = cur; // update the last found message to be cur
