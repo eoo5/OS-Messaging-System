@@ -24,8 +24,8 @@ int main(int argc, char* argv[]) {
     if (argc >= 4 && strcmp(argv[1], "-s") == 0) {
         // Sending a message
         const char* sendee = argv[2];
-        char message[MAX_MESSAGE_LENGTH]; // Allocate a buffer for the message
-        strcpy(message, argv[3]); // Copy the initial message so that we can use strncat
+        char message[MAX_MESSAGE_LENGTH]; // allocate a buffer for the message
+        strcpy(message, argv[3]); // copy the initial message so that we can use strncat
         
         // Check for buffer overflow or if the sendee or message is null
             if (message == NULL|| sendee == NULL){
@@ -101,6 +101,7 @@ int main(int argc, char* argv[]) {
       }
     } else {
         printf("Entries invalid\n");
+        printf("./osmsg <user> <message>\n");
         
         return 1;
     }
