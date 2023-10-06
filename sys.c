@@ -266,40 +266,39 @@ asmlinkage long sys_cs1550_get_msg(const char __user *to, char __user *msg, char
 // Find messages where the sendee matches the user
 	
 struct Message *temp; // way to save current node
-
-while (cur != NULL) {
-    // If the message is found, copy back into the parameters
-    if (strncmp(cur->sendee, to, MAX_USER_LENGTH) == 0) {
-        if (copy_to_user(msg, cur->message, MAX_MESSAGE_LENGTH) ||
-            copy_to_user(from, cur->sender, MAX_USER_LENGTH)) {
-            return -EFAULT; // Error copying to user space
-        }
-
-        // Delete the message from the message list
-        if (prev == NULL) {
-            message_list = cur->next;
-        } else {
-            prev->next = cur->next;
-        }
-
-        found = 1;
-        temp = cur;     // save cur reference in temp
-        cur = cur->next; // shift cur to next node
+struct Message *last_found = NULL; //way to keep track of last/oldest message found
 	
-        //kfree(temp); // Free the memory of the deleted node
-        messages_found++; // Increment messages found
-    } else {
-        prev = cur;
-        cur = cur->next;
+while (cur != NULL) {
+    // If message is found, update last_found and temp
+    if (strncmp(cur->sendee, to, MAX_USER_LENGTH) == 0) {
+        temp = cur; // save cur pointer in temp
+        last_found = cur; // update the last found message to be cur
+        found = 1; //flag found
+        messages_found++; // increment messages_found
     }
+	prev = cur;
+	cur = cur->next;
 }
+//If message was found, copy to parameter and delete it so it doesn't get found again.	
+if(found) {
+      if (copy_to_user(msg, last_found->message, MAX_MESSAGE_LENGTH) ||
+        copy_to_user(from, last_found->sender, MAX_USER_LENGTH)) {
+        return -EFAULT; // Error copying to user space
+    }
+	
+    // Delete last message found
+    if (last_found == message_list) {
+        message_list = last_found->next;
+    } else {
+        prev->next = last_found->next;
+    }
+	
+    kfree(last_found);
 
 //Handle return message with 1 indicating more than 1 message, 0 indicating no more, -1 none at all.
-   if (found) {
-    printk(KERN_ALERT "New Messages Found: %d\n", messages_found);
     if (messages_found > 1) {
         return 1;  // More messages available
-    } else if (messages_found == 1) {
+    } else {
         return 0;  // Message retrieved successfully
     } 
    }
