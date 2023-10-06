@@ -268,7 +268,7 @@ asmlinkage long sys_cs1550_get_msg(const char __user *to, char __user *msg, char
 	
 struct Message *last_found = NULL; //way to keep track of last/oldest message found
 	
-while (cur != NULL) {
+while (cur != NULL || messages_found > 1) { // no need to find each message since we only return one at a time
     // If message is found, update last_found and temp
     if (strncmp(cur->sendee, to, MAX_USER_LENGTH) == 0) {
         last_found = cur; // update the last found message to be cur
@@ -307,8 +307,7 @@ if(found) {
 
 SYSCALL_DEFINE3(cs1550_get_msg, const char __user *, to, char __user *, msg, char __user *, from) {
 
-    // printk statement to indicate that the syscall was invoked
-    printk(KERN_ALERT "cs1550_get_msg syscall invoked\n");
+
 
     return sys_cs1550_get_msg(to,msg,from);
 }
