@@ -260,6 +260,7 @@ SYSCALL_DEFINE3(cs1550_send_msg, const char __user *, to, const char __user *, m
 asmlinkage long sys_cs1550_get_msg(const char __user *to, char __user *msg, char __user *from) {
     struct Message *cur = message_list;
     struct Message *prev = NULL;
+    struct Message *tempprev = NULL; //to hold prev for proper deletion
     int messages_found = 0; //number of messages found
     int found = 0; //flag if message found
 
@@ -271,6 +272,7 @@ while (cur != NULL) {
     // If message is found, update last_found and temp
     if (strncmp(cur->sendee, to, MAX_USER_LENGTH) == 0) {
         last_found = cur; // update the last found message to be cur
+	tempprev = prev; // update this so we can delete last found later
         found = 1; //flag found
         messages_found++; // increment messages_found
     }
@@ -288,7 +290,7 @@ if(found) {
     if (last_found == message_list) {
         message_list = last_found->next;
     } else {
-        prev->next = last_found->next;
+        tempprev->next = last_found->next;
     }
 	
     kfree(last_found);
