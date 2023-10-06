@@ -298,7 +298,7 @@ if(found) {
 //Handle return message with 1 indicating more than 1 message, 0 indicating no more, -1 none at all.
     if (messages_found > 1) {
         return 1;  // More messages available
-    } else if (messages_found == 0) {
+    } else if (messages_found == 1) {
         return 0;  // Message retrieved successfully
     } 
    }
