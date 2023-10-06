@@ -260,8 +260,8 @@ SYSCALL_DEFINE3(cs1550_send_msg, const char __user *, to, const char __user *, m
 asmlinkage long sys_cs1550_get_msg(const char __user *to, char __user *msg, char __user *from) {
     struct Message *cur = message_list;
     struct Message *prev = NULL;
-    int messages_found = 0;
-    int found = 0;
+    int messages_found = 0; //number of messages found
+    int found = 0; //flag if message found
 
 // Find messages where the sendee matches the user
 	
@@ -272,7 +272,9 @@ while (cur != NULL) {
     if (strncmp(cur->sendee, to, MAX_USER_LENGTH) == 0) {
         if (copy_to_user(msg, cur->message, MAX_MESSAGE_LENGTH) ||
             copy_to_user(from, cur->sender, MAX_USER_LENGTH)) {
-            kfree(cur); // Free memory before returning -EFAULT
+    	    struct Message* temp = cur; // Save cur reference in temp
+            cur = cur->next; // Shift cur to the next node
+            kfree(temp); // Free the memory of the deleted node
             return -EFAULT; // Error copying to user space
         }
 
@@ -286,8 +288,7 @@ while (cur != NULL) {
         found = 1;
         temp = cur;     // save cur reference in temp
         cur = cur->next; // shift cur to next node
-
-        kfree(temp); // Free the memory of the deleted node
+        //kfree(temp); // Free the memory of the deleted node
         messages_found++; // Increment messages found
     } else {
         prev = cur;
