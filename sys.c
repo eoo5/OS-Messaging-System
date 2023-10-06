@@ -272,9 +272,6 @@ while (cur != NULL) {
     if (strncmp(cur->sendee, to, MAX_USER_LENGTH) == 0) {
         if (copy_to_user(msg, cur->message, MAX_MESSAGE_LENGTH) ||
             copy_to_user(from, cur->sender, MAX_USER_LENGTH)) {
-    	    struct Message* temp = cur; // Save cur reference in temp
-            cur = cur->next; // Shift cur to the next node
-            kfree(temp); // Free the memory of the deleted node
             return -EFAULT; // Error copying to user space
         }
 
@@ -288,6 +285,7 @@ while (cur != NULL) {
         found = 1;
         temp = cur;     // save cur reference in temp
         cur = cur->next; // shift cur to next node
+	
         //kfree(temp); // Free the memory of the deleted node
         messages_found++; // Increment messages found
     } else {
@@ -298,7 +296,7 @@ while (cur != NULL) {
 
 //Handle return message with 1 indicating more than 1 message, 0 indicating no more, -1 none at all.
    if (found) {
-    printk(KERN_ALERT "Messages Found: %d\n", messages_found);
+    printk(KERN_ALERT "New Messages Found: %d\n", messages_found);
     if (messages_found > 1) {
         return 1;  // More messages available
     } else if (messages_found == 1) {
