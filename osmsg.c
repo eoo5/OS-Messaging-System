@@ -94,7 +94,6 @@ int main(int argc, char* argv[]) {
             break;
         } else if (get_result == 1) {
             printf("%s said: \"%s\"\n", sender, message);
-            printf("You've got more mail!\n");
         } else {
            printf("Error getting messages (Error code: %ld)\n", get_result);
            break; // Exit the loop on error
