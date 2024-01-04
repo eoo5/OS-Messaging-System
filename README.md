@@ -1,5 +1,6 @@
 
-Messaging System
+Linux Kernel Messaging System
+
 This code implements a simple messaging system with two system calls: cs1550_send_msg for sending a message and cs1550_get_msg for retrieving a message.
 
 Data Structure
