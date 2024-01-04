@@ -49,3 +49,9 @@ Notes
 The linked list is static (message_list) and resides in kernel space.
 Kernel memory allocation is done using kmalloc, and deallocation is done using kfree.
 copy_from_user and copy_to_user functions are used to transfer data between user space and kernel space.
+
+Use Case:
+./osmsg -s <sendee> <msg> to send message
+./osmsg -r to receive messages
+gcc osmsg.c -o osmsg to compile
+
